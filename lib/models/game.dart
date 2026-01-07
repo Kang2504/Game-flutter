@@ -113,3 +113,23 @@ class Room {
     );
   }
 }
+
+class ProfileModel {
+  final String id; 
+  final DateTime createdAt;
+  final int lastClearedCase;
+
+  ProfileModel({
+    required this.id,
+    required this.createdAt,
+    required this.lastClearedCase,
+  });
+
+  factory ProfileModel.fromMap(Map<String, dynamic> map) {
+    return ProfileModel(
+      id: map['id'] ?? '',
+      createdAt: DateTime.parse(map['created_at'] ?? DateTime.now().toIso8601String()),
+      lastClearedCase: (map['last_cleared_case'] as int?) ?? 0,
+    );
+  }
+}

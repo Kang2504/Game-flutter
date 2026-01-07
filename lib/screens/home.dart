@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:glogic/widgets/dropdown.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class GameHomePage extends StatefulWidget {
@@ -58,20 +59,7 @@ class _GameHomePageState extends State<GameHomePage> {
                       color: Colors.amber,
                       size: 40,
                     ),
-                    GestureDetector(
-                      onTap: () => _showProfileDialog(context),
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: const BoxDecoration(
-                          color: Colors.white24,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.person_outline,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
+                    DetectiveMenu(),
                   ],
                 ),
               ),
@@ -112,14 +100,26 @@ class _GameHomePageState extends State<GameHomePage> {
                       Icons.find_in_page,
                       'Vụ án\nPhổ thông',
                       textColor,
+                      () => Navigator.pushNamed(context, '/cases'),
                     ),
-                    _menuItem(Icons.stars, 'Sự kiện\nĐặc biệt', textColor),
+                    _menuItem(
+                      Icons.stars,
+                      'Sự kiện\nĐặc biệt',
+                      textColor,
+                      () => Navigator.pushNamed(context, '/cases'),
+                    ),
                     _menuItem(
                       Icons.menu_book,
                       'Hướng dẫn\nCách chơi',
                       textColor,
+                      () => Navigator.pushNamed(context, '/case_selection'),
                     ),
-                    _menuItem(Icons.query_stats, 'Bảng\nXếp hạng', textColor),
+                    _menuItem(
+                      Icons.query_stats,
+                      'Bảng\nXếp hạng',
+                      textColor,
+                      () => Navigator.pushNamed(context, '/cases'),
+                    ),
                   ],
                 ),
               ),
@@ -130,76 +130,46 @@ class _GameHomePageState extends State<GameHomePage> {
     );
   }
 
-  Widget _menuItem(IconData icon, String title, Color text) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(15),
-        // Đổ bóng để tạo chiều sâu cho tờ giấy
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.5),
-            blurRadius: 8,
-            offset: const Offset(3, 3),
+  Widget _menuItem(
+    IconData icon,
+    String title,
+    Color text,
+    VoidCallback onTap,
+  ) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.5),
+              blurRadius: 8,
+              offset: const Offset(3, 3),
+            ),
+          ],
+          image: const DecorationImage(
+            image: AssetImage('assets/images/giay.jpg'),
+            fit: BoxFit.cover,
           ),
-        ],
-        // CHÈN HÌNH ẢNH NỀN TẠI ĐÂY
-        image: const DecorationImage(
-          image: AssetImage('assets/images/giay.jpg'),
-          fit: BoxFit.cover, // Đảm bảo ảnh phủ kín ô
-          // Bạn có thể thêm colorFilter nếu muốn ảnh giấy tối đi một chút
-          // colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.darken),
         ),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 40, color: text),
-          const SizedBox(height: 12),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: text,
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-              // Thêm bóng cho chữ nếu ảnh nền quá sáng khó đọc
-              shadows: [
-                Shadow(color: Colors.white.withOpacity(0.5), blurRadius: 2),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showProfileDialog(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: const Color(0xFF2D2640),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
-      ),
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(30),
-        height: 300,
-        child: const Column(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircleAvatar(
-              radius: 40,
-              backgroundColor: Color(0xFFE8C5E5),
-              child: Icon(Icons.person, size: 50),
-            ),
-            SizedBox(height: 20),
+            Icon(icon, size: 40, color: text),
+            const SizedBox(height: 12),
             Text(
-              'Thám tử: 0912***456',
+              title,
+              textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
+                color: text,
                 fontWeight: FontWeight.bold,
+                fontSize: 16,
+                shadows: [
+                  Shadow(color: Colors.white.withOpacity(0.5), blurRadius: 2),
+                ],
               ),
             ),
-            Text('Cấp bậc: Tập sự', style: TextStyle(color: Colors.white70)),
           ],
         ),
       ),
