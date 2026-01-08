@@ -5,6 +5,11 @@ class GameCase {
   final List<String> clues;
   final List<String> testimony;
   final int? correctSuspectId;
+  final List<Suspect> suspects;
+  final List<Weapon> weapons;
+  final List<Room> rooms;
+  final int? correctWeaponId;
+  final int? correctRoomId;
 
   GameCase({
     required this.id,
@@ -12,7 +17,12 @@ class GameCase {
     required this.description,
     required this.clues,
     required this.testimony,
+    required this.suspects,
+    required this.weapons,
+    required this.rooms,
     this.correctSuspectId,
+    this.correctWeaponId,
+    this.correctRoomId,
   });
 
   factory GameCase.fromJson(Map<String, dynamic> json) {
@@ -22,7 +32,12 @@ class GameCase {
       description: json['description'] ?? '',
       clues: List<String>.from(json['clues'] ?? []),
       testimony: List<String>.from(json['testimony'] ?? []),
+      suspects: (json['suspects'] as List).map((e) => Suspect.fromJson(e)).toList(),
+      weapons: (json['weapons'] as List).map((e) => Weapon.fromJson(e)).toList(),
+      rooms: (json['rooms'] as List).map((e) => Room.fromJson(e)).toList(),
       correctSuspectId: json['correct_suspect_id'],
+      correctWeaponId: json['correct_weapon_id'],
+      correctRoomId: json['correct_room_id'],
     );
   }
 }
@@ -132,4 +147,39 @@ class ProfileModel {
       lastClearedCase: (map['last_cleared_case'] as int?) ?? 0,
     );
   }
+}
+
+class UserProgress {
+  final String id;
+  final String userId;
+  final int caseId;
+  final Map<String, dynamic> matrixState;
+  final bool isCompleted;
+  final DateTime createdAt;
+
+  UserProgress({
+    required this.id,
+    required this.userId,
+    required this.caseId,
+    required this.matrixState,
+    required this.isCompleted,
+    required this.createdAt,
+  });
+
+  factory UserProgress.fromJson(Map<String, dynamic> json) {
+    return UserProgress(
+      id: json['id'],
+      userId: json['user_id'],
+      caseId: json['case_id'] as int,
+      matrixState: json['matrix_state'] as Map<String, dynamic>? ?? {},
+      isCompleted: json['is_completed'] as bool? ?? false,
+      createdAt: DateTime.parse(json['created_at']),
+    );
+  }
+  Map<String, dynamic> toJson() => {
+    'user_id': userId,
+    'case_id': caseId,
+    'matrix_state': matrixState,
+    'is_completed': isCompleted,
+  };
 }

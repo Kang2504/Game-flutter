@@ -5,6 +5,7 @@ import 'package:glogic/screens/plays.dart';
 import 'package:glogic/screens/signin.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../screens/signup.dart';
+import '../screens/case_details.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,6 +33,7 @@ class MyApp extends StatelessWidget {
         '/signin': (context) => LoginPage(),
         '/home': (context) => GameHomePage(),
         '/cases': (context) => CaseSelectionScreen(),
+        '/details': (context) => CaseDetailsScreen(),
       },
     );
   }
