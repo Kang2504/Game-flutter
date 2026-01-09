@@ -31,7 +31,7 @@ class GameCase {
       title: json['title'],
       description: json['description'] ?? '',
       clues: List<String>.from(json['clues'] ?? []),
-      testimony: List<String>.from(json['testimony'] ?? []),
+      testimony: List<String>.from(json['testimonies'] ?? []),
       suspects: (json['suspects'] as List).map((e) => Suspect.fromJson(e)).toList(),
       weapons: (json['weapons'] as List).map((e) => Weapon.fromJson(e)).toList(),
       rooms: (json['rooms'] as List).map((e) => Room.fromJson(e)).toList(),

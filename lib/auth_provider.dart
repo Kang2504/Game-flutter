@@ -92,7 +92,7 @@ class GameLogicNotifier extends AsyncNotifier<void> {
   @override
   Future<void> build() async {}
 
-  // 1. CHỨC NĂNG LƯU MA TRẬN (Chỉ gọi khi nhấn nút Save)
+  //CHỨC NĂNG LƯU MA TRẬN (Chỉ gọi khi nhấn nút Save)
   Future<void> saveCurrentProgress({
     required int caseId,
     required Map<String, dynamic> currentMatrix,

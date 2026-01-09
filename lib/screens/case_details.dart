@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:glogic/models/game.dart';
 import 'package:glogic/auth_provider.dart';
 import 'package:glogic/widgets/card_suspects.dart';
+import 'package:glogic/widgets/card_weapons_rooms.dart';
+import 'package:glogic/widgets/text_trusts.dart';
 
 class CaseDetailsScreen extends ConsumerStatefulWidget {
   const CaseDetailsScreen({super.key});
@@ -18,6 +20,8 @@ class _CaseDetailsScreenState extends ConsumerState<CaseDetailsScreen> {
   int? selectedRoomId;
   bool isCollapsed = false;
   bool isInitialized = false;
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!isInitialized) {
@@ -29,8 +33,6 @@ class _CaseDetailsScreenState extends ConsumerState<CaseDetailsScreen> {
   Future<void> _initializeData() async {
     final GameCase currentCase =
         ModalRoute.of(context)!.settings.arguments as GameCase;
-
-    // Gọi provider để lấy matrix_state đã lưu từ trước (nếu có)
     final savedProgress = await ref.read(
       caseProgressProvider(currentCase.id).future,
     ); //.future là lấy trực tiếp data, .notifier là lấy class của nó
@@ -44,24 +46,22 @@ class _CaseDetailsScreenState extends ConsumerState<CaseDetailsScreen> {
   Widget build(BuildContext context) {
     final GameCase currentCase =
         ModalRoute.of(context)!.settings.arguments as GameCase;
-    // Theo dõi trạng thái của các lệnh Save/Solve (để hiện loading)
     final gameStatus = ref.watch(gameLogicProvider);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5EBE0),
       appBar: AppBar(
-        // AppBar trong suốt để hòa làm một với background
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.brown),
         title: Text(
-          currentCase.title, // Tên vụ án nằm trên AppBar
+          currentCase.title,
           style: const TextStyle(
-            color: Colors.brown,
+            color: Color.fromARGB(255, 255, 0, 0),
             fontWeight: FontWeight.bold,
-            fontFamily: 'Courier', // Kiểu chữ máy đánh chữ
-            fontSize: 20,
+            //fontFamily: 'Courier',
+            fontSize: 24,
           ),
         ),
       ),
@@ -70,26 +70,25 @@ class _CaseDetailsScreenState extends ConsumerState<CaseDetailsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Đoạn văn bản mô tả vụ án - Chữ to và trang trọng
             Text(
               currentCase.description,
               style: const TextStyle(
-                fontSize: 16, // Chữ to như thám tử yêu cầu
+                fontSize: 16,
                 fontWeight: FontWeight.w500,
-                color: Color(0xFF2C1B10), // Màu nâu đen đậm
-                height: 1.5, // Khoảng cách dòng rộng cho dễ đọc
-                fontFamily: 'Georgia', // Kiểu chữ có chân cổ điển
+                color: Color(0xFF2C1B10),
+                height: 1.5,
+                fontFamily: 'Georgia',
               ),
             ),
 
             const SizedBox(height: 30),
             const Divider(thickness: 2, color: Colors.brown),
             const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+              padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
               child: Text(
                 "DANH SÁCH NGHI PHẠM",
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1.2,
                   color: Colors.brown,
@@ -97,10 +96,11 @@ class _CaseDetailsScreenState extends ConsumerState<CaseDetailsScreen> {
               ),
             ),
 
-            // 3. Hiển thị danh sách Nghi phạm bằng Widget thám tử đã code
             ListView.builder(
-              shrinkWrap: true, // Quan trọng: Để ListView nằm trong Column
-              physics: const NeverScrollableScrollPhysics(), // Để dùng chung scroll với SingleChildScrollView
+              padding:
+                  EdgeInsets.zero, // Xóa bỏ khoảng trống thừa của danh sách
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
               itemCount: currentCase.suspects.length,
               itemBuilder: (context, index) {
                 final s = currentCase.suspects[index];
@@ -112,8 +112,112 @@ class _CaseDetailsScreenState extends ConsumerState<CaseDetailsScreen> {
                 );
               },
             ),
+            Padding(
+              padding: const EdgeInsets.only(top: 24, left: 12, right: 12),
+              child: Text(
+                "ĐỊA ĐIỂM",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.2,
+                  color: Colors.brown,
+                ),
+              ),
+            ),
 
-            // Các phần tiếp theo sẽ code tại đây khi thám tử ra lệnh
+            SizedBox(
+              height: 320,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: currentCase.rooms.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 16),
+                itemBuilder: (context, index) {
+                  final room = currentCase.rooms[index];
+                  return VerticalInfoCard(
+                    imageUrl: room.imageUrl ?? "",
+                    name: room.name,
+                    description: room.description,
+                    inout: room.inout,
+                    color: Colors.green,
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              child: Text(
+                "HUNG KHÍ",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.2,
+                  color: Colors.brown,
+                ),
+              ),
+            ),
+
+            SizedBox(
+              height: 270,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: currentCase.weapons.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 16),
+                itemBuilder: (context, index) {
+                  final weapon = currentCase.weapons[index];
+                  return VerticalInfoCard(
+                    imageUrl: weapon.imageUrl ?? "",
+                    name: weapon.name,
+                    description: weapon.description,
+                    inout: weapon.material,
+                    color: const Color.fromARGB(255, 175, 132, 0),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12.0,
+                vertical: 6.0,
+              ),
+              child: Text(
+                "SỰ THẬT ĐỎ",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.2,
+                  color: Colors.brown,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: TruthList(
+                items: currentCase.clues,
+                color: const Color.fromARGB(255, 255, 0, 0),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0,),
+              child: Text(
+                "SỰ THẬT XANH",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.2,
+                  color: Colors.brown,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: TruthList(
+                items: currentCase.testimony,
+                color: const Color.fromARGB(255, 13, 0, 255),
+              ),
+            ),
           ],
         ),
       ),
