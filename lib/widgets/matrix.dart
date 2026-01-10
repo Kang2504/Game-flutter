@@ -99,22 +99,20 @@ class _CaseMatrixState extends ConsumerState<MatrixSelectPage> {
                       _buildSubGrid('w', 'r', 3, 3, cellSize),
                     ],
                   ),
-
-                  // Khối ma trận dưới & Khoảng trống chứa nút
                   Row(
                     children: [
                       _buildSubGrid('r', 's', 3, 3, cellSize),
 
-                      // KHOẢNG TRỐNG DƯỚI BÊN PHẢI - ĐẶT NÚT Ở ĐÂY
                       Container(
                         width: cellSize * 3,
                         height: cellSize * 3,
                         alignment: Alignment.center,
                         child: ToggleCircleButton(
                           initialValue: selectedMode,
-                          onChanged: (val) =>
-                              setState(() => selectedMode = val),
-                          size: 65, // Tăng size một chút cho vừa vặn ô 3x3
+                          onChanged: (val) => setState(
+                            () => selectedMode = val,
+                          ), //Truyền hàm void (int val) {setState(() {selectedMode = val;});}
+                          size: 65,
                         ),
                       ),
                     ],
@@ -126,8 +124,6 @@ class _CaseMatrixState extends ConsumerState<MatrixSelectPage> {
         ),
 
         const SizedBox(height: 30),
-
-        // NÚT SAVE
         ElevatedButton.icon(
           onPressed: () async {
             await ref
@@ -136,6 +132,8 @@ class _CaseMatrixState extends ConsumerState<MatrixSelectPage> {
                   caseId: widget.gamecase.id,
                   currentMatrix: cells,
                 );
+            // Làm mới nó để lần tới quay lại nó sẽ tải data mới từ Server
+            ref.invalidate(caseProgressProvider(widget.gamecase.id));
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text("Hồ sơ đã được lưu!")),
@@ -160,7 +158,8 @@ class _CaseMatrixState extends ConsumerState<MatrixSelectPage> {
     );
   }
 
-  Widget _buildSubGrid(
+  Widget _buildSubGrid( //Render ma trận dựa trên map
+    //Tới đây
     String rType,
     String cType,
     int rows,
@@ -171,7 +170,7 @@ class _CaseMatrixState extends ConsumerState<MatrixSelectPage> {
       width: size * cols,
       height: size * rows,
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.black, width: 1.5),
+        border: Border.all(color: Colors.black, width: 1),
       ),
       child: GridView.builder(
         physics: const NeverScrollableScrollPhysics(),
@@ -180,8 +179,8 @@ class _CaseMatrixState extends ConsumerState<MatrixSelectPage> {
           crossAxisCount: cols,
         ),
         itemBuilder: (context, index) {
-          int r = index ~/ cols;
-          int c = index % cols;
+          int r = index ~/ cols; //Vị trí hàng thứ r
+          int c = index % cols; //Vị trí cột thứ c
           String key = _buildKey(rType, r, cType, c);
           int? val = cells[key];
 

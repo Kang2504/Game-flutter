@@ -70,10 +70,3 @@ class _ToggleCircleButtonState extends State<ToggleCircleButton> {
     );
   }
 }
-
-// ToggleCircleButton(
-//   initialValue: 0,
-//   onChanged: (value) {
-//     debugPrint('Giá trị: $value'); // 0 hoặc 1
-//   },
-// )
