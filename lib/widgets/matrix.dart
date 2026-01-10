@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:glogic/models/game.dart';
 import 'package:glogic/auth_provider.dart';
 import 'package:glogic/widgets/button_matrix.dart';
+import 'package:glogic/widgets/matrix_header.dart';
+import 'package:glogic/widgets/render_matrix.dart';
 
 class MatrixSelectPage extends ConsumerStatefulWidget {
   final GameCase gamecase;
@@ -67,13 +69,15 @@ class _CaseMatrixState extends ConsumerState<MatrixSelectPage> {
               Column(
                 children: [
                   const SizedBox(height: headerSize),
-                  _buildSideHeader(
-                    widget.gamecase.weapons
+                  MatrixSideHeader(
+                    images: widget.gamecase.weapons
                         .map((e) => e.imageUrl ?? "")
                         .toList(),
                   ),
-                  _buildSideHeader(
-                    widget.gamecase.rooms.map((e) => e.imageUrl ?? "").toList(),
+                  MatrixSideHeader(
+                    images: widget.gamecase.rooms
+                        .map((e) => e.imageUrl ?? "")
+                        .toList(),
                   ),
                 ],
               ),
@@ -81,13 +85,13 @@ class _CaseMatrixState extends ConsumerState<MatrixSelectPage> {
                 children: [
                   Row(
                     children: [
-                      _buildTopHeader(
-                        widget.gamecase.suspects
+                      MatrixTopHeader(
+                        images: widget.gamecase.suspects
                             .map((e) => e.imageUrl ?? "")
                             .toList(),
                       ),
-                      _buildTopHeader(
-                        widget.gamecase.rooms
+                      MatrixTopHeader(
+                        images: widget.gamecase.rooms
                             .map((e) => e.imageUrl ?? "")
                             .toList(),
                       ),
@@ -95,13 +99,44 @@ class _CaseMatrixState extends ConsumerState<MatrixSelectPage> {
                   ),
                   Row(
                     children: [
-                      _buildSubGrid('w', 's', 3, 3, cellSize),
-                      _buildSubGrid('w', 'r', 3, 3, cellSize),
+                      CaseSubGrid(
+                        rType: 'w',
+                        cType: 's',
+                        rows: 3,
+                        cols: 3,
+                        size: cellSize,
+                        cells: cells,
+                        keyBuilder: _buildKey, // Truyền tham chiếu hàm buildKey
+                        onCellTap: onCellTap, // Truyền tham chiếu hàm onCellTap
+                      ),
+                      CaseSubGrid(
+                        rType: 'w',
+                        cType: 'r',
+                        rows: 3,
+                        cols: 3,
+                        size: cellSize,
+                        cells: cells,
+                        keyBuilder:
+                            _buildKey, // Truyền tham chiếu hàm buildKey của thám tử
+                        onCellTap:
+                            onCellTap, // Truyền tham chiếu hàm onCellTap của thám tử
+                      ),
                     ],
                   ),
                   Row(
                     children: [
-                      _buildSubGrid('r', 's', 3, 3, cellSize),
+                      CaseSubGrid(
+                        rType: 'r',
+                        cType: 's',
+                        rows: 3,
+                        cols: 3,
+                        size: cellSize,
+                        cells: cells,
+                        keyBuilder:
+                            _buildKey, // Truyền tham chiếu hàm buildKey của thám tử
+                        onCellTap:
+                            onCellTap, // Truyền tham chiếu hàm onCellTap của thám tử
+                      ),
 
                       Container(
                         width: cellSize * 3,
@@ -155,97 +190,6 @@ class _CaseMatrixState extends ConsumerState<MatrixSelectPage> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildSubGrid( //Render ma trận dựa trên map
-    //Tới đây
-    String rType,
-    String cType,
-    int rows,
-    int cols,
-    double size,
-  ) {
-    return Container(
-      width: size * cols,
-      height: size * rows,
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.black, width: 1),
-      ),
-      child: GridView.builder(
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: rows * cols,
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: cols,
-        ),
-        itemBuilder: (context, index) {
-          int r = index ~/ cols; //Vị trí hàng thứ r
-          int c = index % cols; //Vị trí cột thứ c
-          String key = _buildKey(rType, r, cType, c);
-          int? val = cells[key];
-
-          return GestureDetector(
-            onTap: () => onCellTap(key),
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.black12, width: 0.5),
-                color: val == 1
-                    ? Colors.green.withOpacity(0.05)
-                    : val == 0
-                    ? Colors.red.withOpacity(0.05)
-                    : Colors.white,
-              ),
-              child: Center(
-                child: val == null
-                    ? null
-                    : Icon(
-                        val == 1 ? Icons.check : Icons.close,
-                        color: val == 1 ? Colors.green : Colors.red,
-                        size: size * 0.6,
-                      ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  // Tiêu đề ảnh phía trên
-  Widget _buildTopHeader(List<String> images) {
-    return Row(
-      children: images
-          .map(
-            (url) => Container(
-              width: 45,
-              height: 50,
-              padding: const EdgeInsets.all(4),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: Image.network(url, fit: BoxFit.cover),
-              ),
-            ),
-          )
-          .toList(),
-    );
-  }
-
-  // Tiêu đề ảnh bên trái
-  Widget _buildSideHeader(List<String> images) {
-    return Column(
-      children: images
-          .map(
-            (url) => Container(
-              width: 50,
-              height: 45,
-              padding: const EdgeInsets.all(4),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: Image.network(url, fit: BoxFit.cover),
-              ),
-            ),
-          )
-          .toList(),
     );
   }
 }
