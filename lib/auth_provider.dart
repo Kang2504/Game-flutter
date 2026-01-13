@@ -27,12 +27,20 @@ class AuthNotifier extends AsyncNotifier<void> {
   }
 
   Future<void> signOut() async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() => _supabase.auth.signOut());
-  }
+  state = const AsyncLoading();
+  state = await AsyncValue.guard(() async {
+    await _supabase.auth.signOut();
+    ref.invalidate(gameLogicProvider);
+    ref.invalidate(caseProgressProvider); 
+    ref.invalidate(userProfileProvider);
+    ref.invalidate(gameCasesProvider);
+    return;
+  });
+}
 }
 
-final gameCasesProvider = FutureProvider<List<GameCase>>((ref) async { //Lấy hết các cases, và cả các nội dung trong cases
+final gameCasesProvider = FutureProvider<List<GameCase>>((ref) async {
+  //Lấy hết các cases, và cả các nội dung trong cases
   final supabase = Supabase.instance.client;
   final response = await supabase
       .from('cases')
@@ -48,7 +56,8 @@ final gameCasesProvider = FutureProvider<List<GameCase>>((ref) async { //Lấy h
   return data.map((e) => GameCase.fromJson(e)).toList();
 });
 
-final userProfileProvider = FutureProvider<int>((ref) async { //Lấy màn chơi cuối cùng của người chơi
+final userProfileProvider = FutureProvider<int>((ref) async {
+  //Lấy màn chơi cuối cùng của người chơi
   final supabase = Supabase.instance.client;
   final user = supabase.auth.currentUser;
 
@@ -67,12 +76,13 @@ final userProfileProvider = FutureProvider<int>((ref) async { //Lấy màn chơi
   }
 });
 
-class GameService { // cập nhật màn chơi mới nhất của người chơi
+class GameService {
+  // cập nhật màn chơi mới nhất của người chơi
   final SupabaseClient _supabase = Supabase.instance.client;
 
   Future<void> updateLastClearedCase(int newCaseId) async {
     final user = _supabase.auth.currentUser;
-    if (user == null) return;
+    if (user == null) {return;}
     await _supabase
         .from('profiles')
         .update({'last_cleared_case': newCaseId})
@@ -92,26 +102,27 @@ class GameLogicNotifier extends AsyncNotifier<void> {
   @override
   Future<void> build() async {}
 
-  //CHỨC NĂNG LƯU MA TRẬN (Chỉ gọi khi nhấn nút Save)
   Future<void> saveCurrentProgress({
-    required int caseId,
-    required Map<String, dynamic> currentMatrix,
-  }) async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
-      final user = _supabase.auth.currentUser;
-      if (user == null) return;
+  required int caseId,
+  required Map<String, dynamic> currentMatrix,
+}) async {
+  state = const AsyncLoading();
+  try {
+    final user = _supabase.auth.currentUser;
+    if (user == null) throw Exception("User not logged in");
 
-      await _supabase.from('user_progress').upsert({
-        'user_id': user.id,
-        'case_id': caseId,
-        'matrix_state': currentMatrix,
-        // Lưu ý: không cập nhật is_completed ở đây vì họ chỉ đang lưu nháp
-      }, onConflict: 'user_id,case_id');
-    });
+    await _supabase.from('user_progress').upsert({
+      'user_id': user.id,
+      'case_id': caseId,
+      'matrix_state': currentMatrix,
+    }, onConflict: 'user_id,case_id');
+    
+    state = const AsyncData(null);
+  } catch (e, stack) {
+    state = AsyncError(e, stack);
   }
+}
 
-  // 2. CHỨC NĂNG KẾT LUẬN (Vẫn như cũ)
   Future<bool> solveCase({
     required GameCase gameCase,
     required int sId,
@@ -121,9 +132,10 @@ class GameLogicNotifier extends AsyncNotifier<void> {
   }) async {
     state = const AsyncLoading();
 
-    final bool isCorrect = sId == gameCase.correctSuspectId &&
-                           wId == gameCase.correctWeaponId &&
-                           rId == gameCase.correctRoomId;
+    final bool isCorrect =
+        sId == gameCase.correctSuspectId &&
+        wId == gameCase.correctWeaponId &&
+        rId == gameCase.correctRoomId;
 
     if (!isCorrect) {
       state = const AsyncData(null);
@@ -142,9 +154,10 @@ class GameLogicNotifier extends AsyncNotifier<void> {
         'is_completed': true,
       }, onConflict: 'user_id,case_id');
 
-      await _supabase.from('profiles').update({
-        'last_cleared_case': gameCase.id,
-      }).eq('id', user.id);
+      await _supabase
+          .from('profiles')
+          .update({'last_cleared_case': gameCase.id})
+          .eq('id', user.id);
 
       ref.invalidate(userProfileProvider);
     });
@@ -152,7 +165,11 @@ class GameLogicNotifier extends AsyncNotifier<void> {
   }
 }
 
-final caseProgressProvider = FutureProvider.family<Map<String, dynamic>, int>((ref, caseId) async { //Lấy data ma trận đã lưu của người chơi
+final caseProgressProvider = FutureProvider.family<Map<String, dynamic>, int>((
+  ref,
+  caseId,
+) async {
+  //Lấy data ma trận đã lưu của người chơi
   final supabase = Supabase.instance.client;
   final user = supabase.auth.currentUser;
   if (user == null) return {};

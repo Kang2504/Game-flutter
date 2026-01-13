@@ -45,7 +45,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
     ref.listen(authProvider, (prev, next) {
       next.whenOrNull(
-        data: (_) => Navigator.pushReplacementNamed(context, '/home'),
+        data: (_) {
+        Navigator.pushNamedAndRemoveUntil(
+          context, 
+          '/home', 
+          (route) => false,
+        );
+      },
       );
     });
 

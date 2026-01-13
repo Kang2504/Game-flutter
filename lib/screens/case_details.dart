@@ -4,8 +4,10 @@ import 'package:glogic/models/game.dart';
 import 'package:glogic/auth_provider.dart';
 import 'package:glogic/widgets/card_suspects.dart';
 import 'package:glogic/widgets/card_weapons_rooms.dart';
+import 'package:glogic/widgets/dialog.dart';
 import 'package:glogic/widgets/matrix.dart';
 import 'package:glogic/widgets/text_trusts.dart';
+import '../widgets/button_conclusion.dart';
 
 class CaseDetailsScreen extends ConsumerWidget {
   const CaseDetailsScreen({super.key});
@@ -32,6 +34,17 @@ class CaseDetailsScreen extends ConsumerWidget {
           ),
         ),
       ),
+      floatingActionButton: ConclusionButton(
+        onPressed: () {
+          showConclusionDialog(
+            context: context,
+            gameCase: currentCase,
+            finalMatrix: {},
+          );
+        },
+      ),
+
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       body: progressAsync.when(
         loading: () =>
             const Center(child: CircularProgressIndicator(color: Colors.brown)),
@@ -90,7 +103,7 @@ class CaseDetailsScreen extends ConsumerWidget {
                 _buildLabel("HUNG KHÍ", topPadding: 24),
                 _buildHorizontalList(
                   itemCount: currentCase.weapons.length,
-                  height: 270,
+                  height: 290,
                   builder: (context, index) {
                     final weapon = currentCase.weapons[index];
                     return VerticalInfoCard(
@@ -129,8 +142,7 @@ class CaseDetailsScreen extends ConsumerWidget {
                   gamecase: currentCase,
                   initialState: savedProgress,
                 ),
-
-                const SizedBox(height: 80),
+                const SizedBox(height: 120),
               ],
             ),
           );

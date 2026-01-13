@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:glogic/models/game.dart';
-import 'package:glogic/auth_provider.dart';
 import 'package:glogic/widgets/button_matrix.dart';
 import 'package:glogic/widgets/matrix_header.dart';
 import 'package:glogic/widgets/render_matrix.dart';
+import 'package:glogic/widgets/save_button.dart';
 
 class MatrixSelectPage extends ConsumerStatefulWidget {
   final GameCase gamecase;
@@ -28,6 +28,17 @@ class _CaseMatrixState extends ConsumerState<MatrixSelectPage> {
   void initState() {
     super.initState();
     cells = Map<String, dynamic>.from(widget.initialState);
+  }
+
+  @override
+  void didUpdateWidget(covariant MatrixSelectPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // nếu initialState mới khác cũ, reset cells
+    if (oldWidget.initialState != widget.initialState) {
+      setState(() {
+        cells = Map<String, dynamic>.from(widget.initialState);
+      });
+    }
   }
 
   // rowType_rowId_colType_colId
@@ -59,134 +70,117 @@ class _CaseMatrixState extends ConsumerState<MatrixSelectPage> {
     const double cellSize = 45.0;
     const double headerSize = 50.0;
 
-    return Column(
+    return Stack(
       children: [
-        Center(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Column(
+        Column(
+          children: [
+            Center(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: headerSize),
-                  MatrixSideHeader(
-                    images: widget.gamecase.weapons
-                        .map((e) => e.imageUrl ?? "")
-                        .toList(),
-                  ),
-                  MatrixSideHeader(
-                    images: widget.gamecase.rooms
-                        .map((e) => e.imageUrl ?? "")
-                        .toList(),
-                  ),
-                ],
-              ),
-              Column(
-                children: [
-                  Row(
+                  Column(
                     children: [
-                      MatrixTopHeader(
-                        images: widget.gamecase.suspects
+                      const SizedBox(height: headerSize),
+                      MatrixSideHeader(
+                        images: widget.gamecase.weapons
                             .map((e) => e.imageUrl ?? "")
                             .toList(),
                       ),
-                      MatrixTopHeader(
+                      MatrixSideHeader(
                         images: widget.gamecase.rooms
                             .map((e) => e.imageUrl ?? "")
                             .toList(),
                       ),
                     ],
                   ),
-                  Row(
+                  Column(
                     children: [
-                      CaseSubGrid(
-                        rType: 'w',
-                        cType: 's',
-                        rows: 3,
-                        cols: 3,
-                        size: cellSize,
-                        cells: cells,
-                        keyBuilder: _buildKey, // Truyền tham chiếu hàm buildKey
-                        onCellTap: onCellTap, // Truyền tham chiếu hàm onCellTap
+                      Row(
+                        children: [
+                          MatrixTopHeader(
+                            images: widget.gamecase.suspects
+                                .map((e) => e.imageUrl ?? "")
+                                .toList(),
+                          ),
+                          MatrixTopHeader(
+                            images: widget.gamecase.rooms
+                                .map((e) => e.imageUrl ?? "")
+                                .toList(),
+                          ),
+                        ],
                       ),
-                      CaseSubGrid(
-                        rType: 'w',
-                        cType: 'r',
-                        rows: 3,
-                        cols: 3,
-                        size: cellSize,
-                        cells: cells,
-                        keyBuilder:
-                            _buildKey, // Truyền tham chiếu hàm buildKey của thám tử
-                        onCellTap:
-                            onCellTap, // Truyền tham chiếu hàm onCellTap của thám tử
+                      Row(
+                        children: [
+                          CaseSubGrid(
+                            rType: 'w',
+                            cType: 's',
+                            rows: 3,
+                            cols: 3,
+                            size: cellSize,
+                            cells: cells,
+                            keyBuilder:
+                                _buildKey, // Truyền tham chiếu hàm buildKey
+                            onCellTap:
+                                onCellTap, // Truyền tham chiếu hàm onCellTap
+                          ),
+                          CaseSubGrid(
+                            rType: 'w',
+                            cType: 'r',
+                            rows: 3,
+                            cols: 3,
+                            size: cellSize,
+                            cells: cells,
+                            keyBuilder:
+                                _buildKey, // Truyền tham chiếu hàm buildKey của thám tử
+                            onCellTap:
+                                onCellTap, // Truyền tham chiếu hàm onCellTap của thám tử
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      CaseSubGrid(
-                        rType: 'r',
-                        cType: 's',
-                        rows: 3,
-                        cols: 3,
-                        size: cellSize,
-                        cells: cells,
-                        keyBuilder:
-                            _buildKey, // Truyền tham chiếu hàm buildKey của thám tử
-                        onCellTap:
-                            onCellTap, // Truyền tham chiếu hàm onCellTap của thám tử
-                      ),
+                      Row(
+                        children: [
+                          CaseSubGrid(
+                            rType: 'r',
+                            cType: 's',
+                            rows: 3,
+                            cols: 3,
+                            size: cellSize,
+                            cells: cells,
+                            keyBuilder:
+                                _buildKey, // Truyền tham chiếu hàm buildKey của thám tử
+                            onCellTap:
+                                onCellTap, // Truyền tham chiếu hàm onCellTap của thám tử
+                          ),
 
-                      Container(
-                        width: cellSize * 3,
-                        height: cellSize * 3,
-                        alignment: Alignment.center,
-                        child: ToggleCircleButton(
-                          initialValue: selectedMode,
-                          onChanged: (val) => setState(
-                            () => selectedMode = val,
-                          ), //Truyền hàm void (int val) {setState(() {selectedMode = val;});}
-                          size: 65,
-                        ),
+                          Container(
+                            width: cellSize * 3,
+                            height: cellSize * 3,
+                            alignment: Alignment.center,
+                            child: ToggleCircleButton(
+                              initialValue: selectedMode,
+                              onChanged: (val) => setState(
+                                () => selectedMode = val,
+                              ), //Truyền hàm void (int val) {setState(() {selectedMode = val;});}
+                              size: 65,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ],
               ),
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 30),
-        ElevatedButton.icon(
-          onPressed: () async {
-            await ref
-                .read(gameLogicProvider.notifier)
-                .saveCurrentProgress(
-                  caseId: widget.gamecase.id,
-                  currentMatrix: cells,
-                );
-            // Làm mới nó để lần tới quay lại nó sẽ tải data mới từ Server
-            ref.invalidate(caseProgressProvider(widget.gamecase.id));
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Hồ sơ đã được lưu!")),
-              );
-            }
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.brown,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
             ),
-          ),
-          icon: const Icon(Icons.cloud_upload),
-          label: const Text(
-            "LƯU TIẾN TRÌNH",
-            style: TextStyle(fontWeight: FontWeight.bold),
+            const SizedBox(height: 30),
+          ],
+        ),
+        Positioned(
+          top: 8,
+          left: 25,
+          child: SaveProgressButton(
+            caseId: widget.gamecase.id,
+            currentMatrix: cells,
           ),
         ),
       ],

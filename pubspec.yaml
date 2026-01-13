@@ -14,6 +14,8 @@ dependencies:
   smooth_page_indicator: ^2.0.1
   supabase_flutter: ^2.12.0
   zo_animated_border: ^1.0.6
+  confetti: ^0.7.0
+  animated_bottom_navigation_bar: ^1.4.0
 
 dev_dependencies:
   flutter_test:
