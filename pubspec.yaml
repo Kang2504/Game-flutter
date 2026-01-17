@@ -16,6 +16,7 @@ dependencies:
   zo_animated_border: ^1.0.6
   confetti: ^0.7.0
   animated_bottom_navigation_bar: ^1.4.0
+  image_picker: ^1.2.1
 
 dev_dependencies:
   flutter_test:
@@ -27,3 +28,7 @@ flutter:
   assets:
     - assets/images/detective.jpg
     - assets/images/giay.jpg
+    - assets/frames/wood.jpg
+    - assets/frames/Cu.jpg
+    - assets/frames/silver.jpg
+    - assets/frames/gold.jpg

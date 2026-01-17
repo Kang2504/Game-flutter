@@ -133,11 +133,15 @@ class ProfileModel {
   final String id; 
   final DateTime createdAt;
   final int lastClearedCase;
+  final String? name;
+  final String? avatar;
 
   ProfileModel({
     required this.id,
     required this.createdAt,
     required this.lastClearedCase,
+    this.name,
+    this.avatar,
   });
 
   factory ProfileModel.fromMap(Map<String, dynamic> map) {
@@ -145,6 +149,22 @@ class ProfileModel {
       id: map['id'] ?? '',
       createdAt: DateTime.parse(map['created_at'] ?? DateTime.now().toIso8601String()),
       lastClearedCase: (map['last_cleared_case'] as int?) ?? 0,
+      name: map['name'] as String?,
+      avatar: map['avatar'] as String?,
+    );
+  }
+
+  ProfileModel copyWith({
+    String? name,
+    String? avatar,
+    int? lastClearedCase,
+  }) {
+    return ProfileModel(
+      id: id,
+      createdAt: createdAt,
+      lastClearedCase: lastClearedCase ?? this.lastClearedCase,
+      name: name ?? this.name,
+      avatar: avatar ?? this.avatar,
     );
   }
 }

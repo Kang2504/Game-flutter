@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:glogic/models/game.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 final authProvider = AsyncNotifierProvider<AuthNotifier, void>(
   AuthNotifier.new,
@@ -46,6 +48,7 @@ class AuthNotifier extends AsyncNotifier<void> {
       ref.invalidate(caseProgressProvider);
       ref.invalidate(userProfileProvider);
       ref.invalidate(gameCasesProvider);
+      ref.invalidate(profileProvider);
       return;
     });
   }
@@ -130,7 +133,7 @@ class GameLogicNotifier extends AsyncNotifier<void> {
         'user_id': user.id,
         'case_id': caseId,
         'matrix_state': currentMatrix,
-      }, onConflict: 'user_id,case_id');
+      }, onConflict: 'user_id,case_id'); //Update nếu tồn tại, không thì insert
 
       state = const AsyncData(null);
     } catch (e, stack) {
@@ -173,6 +176,7 @@ class GameLogicNotifier extends AsyncNotifier<void> {
           .from('profiles')
           .update({'last_cleared_case': gameCase.id})
           .eq('id', user.id);
+      ref.invalidate(profileProvider);
 
       ref.invalidate(userProfileProvider);
     });
@@ -198,3 +202,84 @@ final caseProgressProvider = FutureProvider.family<Map<String, dynamic>, int>((
 
   return (data?['matrix_state'] as Map<String, dynamic>?) ?? {};
 });
+
+final profileProvider = AsyncNotifierProvider<ProfileNotifier, ProfileModel>(
+  ProfileNotifier.new,
+);
+
+class ProfileNotifier extends AsyncNotifier<ProfileModel> {
+  final _supabase = Supabase.instance.client;
+  final _picker = ImagePicker();
+
+  @override
+  Future<ProfileModel> build() async {
+    final user = _supabase.auth.currentUser!;
+    final data = await _supabase
+        .from('profiles')
+        .select()
+        .eq('id', user.id)
+        .single();
+
+    return ProfileModel.fromMap(data);
+  }
+
+  Future<void> changeAvatar() async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return;
+
+    final XFile? pickedFile = await _picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 512,
+      maxHeight: 512,
+      imageQuality: 85,
+    );
+    if (pickedFile == null) return;
+    state = const AsyncLoading();
+    try {
+      final file = File(pickedFile.path);
+      final filePath = '${user.id}/avatar.png';
+      await _supabase.storage
+          .from('avatars')
+          .upload(
+            filePath,
+            file,
+            fileOptions: const FileOptions(
+              upsert: true,
+              contentType: 'image/png',
+            ),
+          );
+
+      final publicUrl = _supabase.storage
+          .from('avatars')
+          .getPublicUrl(filePath);
+
+      await _supabase
+          .from('profiles')
+          .update({'avatar': publicUrl})
+          .eq('id', user.id);
+
+      // reload profile
+      state = AsyncData(await build());
+    } catch (e, st) {
+      state = AsyncError(e, st);
+    }
+  }
+
+  Future<bool> changeName(String newName) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return false;
+
+    try {
+      await _supabase
+          .from('profiles')
+          .update({'name': newName})
+          .eq('id', user.id);
+
+      state = AsyncData(state.value!.copyWith(name: newName));
+      return true;
+    } on PostgrestException catch (e, st) {
+      state = AsyncError(e, st);
+      return false;
+    }
+  }
+}

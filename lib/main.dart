@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:glogic/screens/home.dart';
 import 'package:glogic/screens/plays.dart';
+import 'package:glogic/screens/profile.dart';
 import 'package:glogic/screens/signin.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../screens/signup.dart';
@@ -34,6 +35,7 @@ class MyApp extends StatelessWidget {
         '/home': (context) => GameHomePage(),
         '/cases': (context) => CaseSelectionScreen(),
         '/details': (context) => CaseDetailsScreen(),
+        '/profile': (context) => ProfileScreen(),
       },
     );
   }

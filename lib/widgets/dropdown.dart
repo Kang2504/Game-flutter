@@ -14,9 +14,9 @@ class DetectiveMenu extends ConsumerWidget {
     final authState = ref.watch(authProvider);
 
     return PopupMenuButton<String>(
-      offset: const Offset(0, 50),
+      offset: const Offset(0, 50), //Đẩy menu xuống 50px
       surfaceTintColor: _paperColor,
-      elevation: 10,
+      elevation: 10, //ĐỘ nổi shadow
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: const BorderSide(color: _inkColor, width: 1.5),
@@ -32,7 +32,7 @@ class DetectiveMenu extends ConsumerWidget {
             Navigator.of(context).pushNamedAndRemoveUntil('/signin', (route) => false);
           }
         } else if (value == 'profile') {
-          // Xử lý hồ sơ thám tử
+          Navigator.of(context).pushNamed('/profile');
         }
       },
       itemBuilder: (context) => [
