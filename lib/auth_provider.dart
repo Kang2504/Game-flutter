@@ -21,22 +21,34 @@ class AuthNotifier extends AsyncNotifier<void> {
 
   Future<void> signIn({required String phone, required String password}) async {
     state = const AsyncLoading();
-    state = await AsyncValue.guard(
-      () => _supabase.auth.signInWithPassword(phone: phone, password: password),
-    );
+    state = await AsyncValue.guard(() async {
+      final res = await _supabase.auth.signInWithPassword(
+        phone: phone,
+        password: password,
+      );
+
+      final user = res.user;
+      if (user == null) {
+        throw Exception('Login failed: user null');
+      }
+      await _supabase.from('profiles').upsert({
+        'id': user.id,
+        'last_cleared_case': null,
+      }, ignoreDuplicates: true); //Có id thì không add
+    });
   }
 
   Future<void> signOut() async {
-  state = const AsyncLoading();
-  state = await AsyncValue.guard(() async {
-    await _supabase.auth.signOut();
-    ref.invalidate(gameLogicProvider);
-    ref.invalidate(caseProgressProvider); 
-    ref.invalidate(userProfileProvider);
-    ref.invalidate(gameCasesProvider);
-    return;
-  });
-}
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      await _supabase.auth.signOut();
+      ref.invalidate(gameLogicProvider);
+      ref.invalidate(caseProgressProvider);
+      ref.invalidate(userProfileProvider);
+      ref.invalidate(gameCasesProvider);
+      return;
+    });
+  }
 }
 
 final gameCasesProvider = FutureProvider<List<GameCase>>((ref) async {
@@ -69,6 +81,7 @@ final userProfileProvider = FutureProvider<int>((ref) async {
         .select('last_cleared_case')
         .eq('id', user.id)
         .maybeSingle();
+    //print("DỮ LIỆU THỰC TẾ TỪ SUPABASE: $data");
     if (data == null) return 0;
     return (data['last_cleared_case'] as int?) ?? 0;
   } catch (e) {
@@ -82,7 +95,9 @@ class GameService {
 
   Future<void> updateLastClearedCase(int newCaseId) async {
     final user = _supabase.auth.currentUser;
-    if (user == null) {return;}
+    if (user == null) {
+      return;
+    }
     await _supabase
         .from('profiles')
         .update({'last_cleared_case': newCaseId})
@@ -103,25 +118,25 @@ class GameLogicNotifier extends AsyncNotifier<void> {
   Future<void> build() async {}
 
   Future<void> saveCurrentProgress({
-  required int caseId,
-  required Map<String, dynamic> currentMatrix,
-}) async {
-  state = const AsyncLoading();
-  try {
-    final user = _supabase.auth.currentUser;
-    if (user == null) throw Exception("User not logged in");
+    required int caseId,
+    required Map<String, dynamic> currentMatrix,
+  }) async {
+    state = const AsyncLoading();
+    try {
+      final user = _supabase.auth.currentUser;
+      if (user == null) throw Exception("User not logged in");
 
-    await _supabase.from('user_progress').upsert({
-      'user_id': user.id,
-      'case_id': caseId,
-      'matrix_state': currentMatrix,
-    }, onConflict: 'user_id,case_id');
-    
-    state = const AsyncData(null);
-  } catch (e, stack) {
-    state = AsyncError(e, stack);
+      await _supabase.from('user_progress').upsert({
+        'user_id': user.id,
+        'case_id': caseId,
+        'matrix_state': currentMatrix,
+      }, onConflict: 'user_id,case_id');
+
+      state = const AsyncData(null);
+    } catch (e, stack) {
+      state = AsyncError(e, stack);
+    }
   }
-}
 
   Future<bool> solveCase({
     required GameCase gameCase,
