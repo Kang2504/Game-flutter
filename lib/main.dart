@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:glogic/screens/home.dart';
 import 'package:glogic/screens/plays.dart';
-import 'package:glogic/screens/profile.dart';
+import 'package:glogic/screens/profiles.dart';
 import 'package:glogic/screens/signin.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../screens/signup.dart';

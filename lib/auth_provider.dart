@@ -229,9 +229,6 @@ class ProfileNotifier extends AsyncNotifier<ProfileModel> {
 
     final XFile? pickedFile = await _picker.pickImage(
       source: ImageSource.gallery,
-      maxWidth: 512,
-      maxHeight: 512,
-      imageQuality: 85,
     );
     if (pickedFile == null) return;
     state = const AsyncLoading();

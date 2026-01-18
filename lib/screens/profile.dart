@@ -72,7 +72,7 @@ class ProfileHeader extends ConsumerWidget {
                     profile.avatar ??
                     'https://images.stockcake.com/public/a/c/f/acfb40f8-55fe-4019-8c7e-ccdd2e3b11b4_large/detective-analyzing-clues-stockcake.jpg',
                 clearedCase: profile.lastClearedCase,
-                size: 96,
+                size: 170,
               ),
               if (isLoading)
                 const Positioned.fill(

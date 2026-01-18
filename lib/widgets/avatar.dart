@@ -8,7 +8,7 @@ class Avatar extends StatelessWidget {
     super.key,
     required this.avatarUrl,
     required this.clearedCase,
-    this.size = 80,
+    this.size = 170,
   });
 
   String get _frameAsset {
@@ -36,8 +36,8 @@ class Avatar extends StatelessWidget {
         ),
 
         Container(
-          width: size * 0.78,
-          height: size * 0.78,
+          width: size * 0.84,
+          height: size * 0.84,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             image: DecorationImage(
@@ -45,8 +45,8 @@ class Avatar extends StatelessWidget {
               fit: BoxFit.cover,
             ),
             border: Border.all(
-              color: Colors.brown.shade900,
-              width: 1.5,
+              color: const Color.fromARGB(255, 255, 255, 255),
+              width: 2,
             ),
           ),
         ),
